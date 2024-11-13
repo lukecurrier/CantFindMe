@@ -1,0 +1,14 @@
+anthropic
+mistralai
+numpy
+scipy
+ollama
+openai
+tenacity
+together
+setuptools
+python-dotenv
+networkx
+PyYAML
+matplotlib
+sklearn

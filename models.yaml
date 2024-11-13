@@ -1,0 +1,9 @@
+auditor_model: Qwen/Qwen2-72B-Instruct
+test_models:
+  - meta-llama/Llama-3-70b-chat-hf
+  - meta-llama/Llama-3-8b-chat-hf
+  - google/gemma-2-27b-it
+  - mistralai/Mistral-7B-Instruct-v0.3
+test_indexes:
+  - 0
+  - 1
