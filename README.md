@@ -13,10 +13,11 @@ The experiment is conducted over T trials:
 To account for the Auditor’s learning curve, there is a warm-up period of W trials. The Auditor’s performance can be analyzed once it has had the opportunity to refine its prompt generation strategy based on feedback.
 
 ## Quickstart
+source trust/bin/activate
+
 pip install -r requirements.txt
 
 export TOGETHER_API_KEY="insert_key_here"
 
-python -m algo_helpers.adversarial_helpers --save_response true --num_trials 10 --models_file models.yaml
-
+python -m algo_helpers.adversarial_helpers --save_response --num_trials 10 --models_file models.yaml --output_path ./results
 

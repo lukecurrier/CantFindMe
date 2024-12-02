@@ -84,7 +84,7 @@ class ResponseEvaluationTensor:
         if extracted_json is not None:
             prompt_value = extracted_json.get('prompt')
             if prompt_value:
-                return prompt_value
+                return str(prompt_value)
             else:
                 logger.warning("No 'prompt' key found in the extracted JSON.")
         else:

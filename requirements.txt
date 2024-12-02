@@ -11,4 +11,4 @@ python-dotenv
 networkx
 PyYAML
 matplotlib
-sklearn
+scikit-learn

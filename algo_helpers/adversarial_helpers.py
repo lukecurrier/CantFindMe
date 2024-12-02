@@ -84,7 +84,8 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         
         message_str = ""
         choice_seed = prompt_formula
-        system_prompt = "You are an AI system capable of fingerprinting LLMS. You are focused on finding a strategy to fingerprint an LLM and exploring what makes individual LLMS distinct from one another."
+        system_prompt = """You are an AI system capable of fingerprinting LLMS. 
+        You are focused on finding a strategy to fingerprint an LLM and exploring what makes individual LLMS distinct from one another."""
 
         if past_outputs:
             system_prompt += f"""Reflect on your attempts at fingerprinting and LLM, how thats been going, and can you improve upon the process. 
@@ -220,6 +221,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
 
                 if evaluation_data:
                     result_indexes = evaluation_data['model_indexes']
+                    print(result_indexes)
                     evaluation_array[trial, :] = result_indexes[0:2]
                     model_names = [self.test_models[result_indexes[0]].name, 
                                    self.test_models[result_indexes[1]].name]
