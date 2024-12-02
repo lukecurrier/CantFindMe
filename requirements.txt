@@ -12,3 +12,8 @@ networkx
 PyYAML
 matplotlib
 scikit-learn
+transformers 
+textstat 
+mauve-text 
+nltk
+torch
