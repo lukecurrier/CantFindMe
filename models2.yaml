@@ -1,0 +1,9 @@
+auditor_model: mistralai/Mistral-7B-Instruct-v0.3
+test_models:
+  - meta-llama/Llama-3-13b-chat-hf
+  - meta-llama/Llama-3-7b-chat-hf
+  - google/gemma-2-7b
+  - mistralai/Mistral-3.3B-Instruct
+test_indexes:
+  - 0
+  - 1
