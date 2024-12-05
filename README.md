@@ -1,5 +1,5 @@
 # Can't Find Me - Obscuring LLM Traces
-Originally created as a final project for CS6973 Trustworthy Generative AI. 
+Created as a final project for CS6973 Trustworthy Generative AI. 
 
 The Hide and Seek approach uses a two-model iterative learning process to create prompts that identify the model family of the LLM they're querying from and subsequently analyze them against other generations. These two models are known as the 'Auditor' and the 'Detective'.
 
