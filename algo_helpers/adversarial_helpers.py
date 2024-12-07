@@ -73,6 +73,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         self.auditor_model = LLMModel(config["auditor_model"]) 
         self.test_models = [LLMModel(model_handle=model) for model in config["test_models"]]
         self.test_indexes = config["test_indexes"]
+        self.perturb_defender_output = config["perturbation"]
 
     def generate_adversarial_prompt(self, model_handle: str, past_prompts: List =[], _num_attempts:int = 0, 
                                     word_limit: int = 100, past_outputs=None, past_results = None):
@@ -171,6 +172,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
 
         if config.save_response:
             response_array = np.empty((len(self.test_models), config.num_trials), dtype=object)
+            prompt_array = np.empty(config.num_trials, dtype=object)
 
         def process_evaluator():
             past_prompts = []
@@ -201,6 +203,9 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                     logger.info(f"Optimized prompt: {p_optim}")
                 else:
                     p_optim = p
+
+                if config.save_response:
+                    prompt_array[trial] = p_optim
 
                 for col_idx in range(len(self.test_models)):
                     # Don't need to evaluate the auditor
@@ -256,6 +261,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
 
         if config.save_response:
             output_obj['responses'] = response_array
+            output_obj['prompts'] = prompt_array
 
         return output_obj
     

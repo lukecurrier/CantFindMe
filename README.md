@@ -15,9 +15,9 @@ To account for the Auditor’s learning curve, there is a warm-up period of W tr
 ## Quickstart
 source trust/bin/activate
 
-pip install -r requirements.txt
+pip install -r utils/requirements.txt
 
 export TOGETHER_API_KEY="insert_key_here"
 
-python -m algo_helpers.adversarial_helpers --save_response --num_trials 10 --models_file models.yaml --output_path ./results
+python -m algo_helpers.adversarial_helpers --save_response --num_trials 10 --models_file utils/models.yaml --output_path ./results
 

@@ -20,6 +20,8 @@ from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
 from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
 
+from nltk.corpus import wordnet
+
 logger = setup_logger(__name__)
 
 
@@ -46,6 +48,14 @@ class LLMModel:
         self.MMLU_score = MMLU_score
         self.name = name or f"{self.model_handle}"
 
+class EnsembleModel: 
+    def __init__(self, models: List[LLMModel], MMLU_score = None):
+        self.models = models
+        self.MMLU_score = MMLU_score
+        self.name = "Ensemble"
+    
+    def return_random_handle(self) -> str:
+        return random.choice(models)
 
 class EvaluationConfig:
     def __init__(self, config):
