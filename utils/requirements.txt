@@ -17,3 +17,5 @@ textstat
 mauve-text 
 nltk
 torch
+llmlingua
+spacy

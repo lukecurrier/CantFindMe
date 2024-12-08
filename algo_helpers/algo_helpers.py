@@ -20,7 +20,7 @@ from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
 from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
 
-from nltk.corpus import wordnet
+from llmlingua import PromptCompressor
 
 logger = setup_logger(__name__)
 
@@ -40,6 +40,14 @@ def extract_json(text):  # FIXME, duplicate from llm/llm_provider_ranking_experi
         except json.JSONDecodeError as e:
             logger.error(f"{e}")
             return None
+    return None
+
+def compress_prompt(prompt, rate=0.5):
+    llm_lingua = PromptCompressor("microsoft/phi-2", device_map="mps")
+    compressed_prompt = llm_lingua.compress_prompt(prompt, rate=rate)
+    return compressed_prompt
+
+def perturb_output(): 
     return None
 
 class LLMModel:

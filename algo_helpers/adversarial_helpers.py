@@ -21,7 +21,7 @@ import argparse
 from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
 from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
-from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, extract_json, ResponseEvaluationTensor, parse_args
+from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, extract_json, ResponseEvaluationTensor, parse_args, compress_prompt
 logger = setup_logger(__name__)
 
 
@@ -73,7 +73,10 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         self.auditor_model = LLMModel(config["auditor_model"]) 
         self.test_models = [LLMModel(model_handle=model) for model in config["test_models"]]
         self.test_indexes = config["test_indexes"]
-        self.perturb_defender_output = config["perturbation"]
+        if "compression" in config:
+            self.compress_prompt = config["compression"][0]
+        if "perturbation" in config:
+            self.perturb_defender_output = config["perturbation"]
 
     def generate_adversarial_prompt(self, model_handle: str, past_prompts: List =[], _num_attempts:int = 0, 
                                     word_limit: int = 100, past_outputs=None, past_results = None):
@@ -210,13 +213,21 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                 for col_idx in range(len(self.test_models)):
                     # Don't need to evaluate the auditor
                     model_under_test = self.test_models[col_idx]
-                    logger.info(f"Model under test: {model_under_test.name}")
-                    
-                    response = TogetherClient(
-                        api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
-                        system="",
-                        message=p_optim)
+                    logger.info(f"Model under test: {model_under_test.name}, Index: {col_idx}")
 
+                    if self.compress_prompt > 0.0 and col_idx==0:
+                        print("Compressing prompt for target model")
+                        compressed = compress_prompt(prompt=p_optim, rate=self.compress_prompt)
+                        print(compressed)
+                        response = TogetherClient(
+                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            system="",
+                            message=compressed["compressed_prompt"])
+                    else:
+                        response = TogetherClient(
+                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            system="",
+                            message=p_optim)
                     model_outputs.append(response)
 
                     if config.save_response:
