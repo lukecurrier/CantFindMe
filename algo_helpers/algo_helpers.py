@@ -16,9 +16,9 @@ from scipy.stats import ttest_ind, ttest_ind, mannwhitneyu, t, sem
 from dotenv import load_dotenv
 import argparse
 
-#from llm.llm_client import TogetherClient
-#from utils.logger_config import setup_logger
-#from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
+from llm.llm_client import TogetherClient
+from utils.logger_config import setup_logger
+from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
 
 from llmlingua import PromptCompressor
 
@@ -29,7 +29,7 @@ nltk.download('wordnet')
 nltk.download('omw-1.4')
 nlp = spacy.load("en_core_web_sm")
 
-#logger = setup_logger(__name__)
+logger = setup_logger(__name__)
 
 def extract_json(text):  # FIXME, duplicate from llm/llm_provider_ranking_experiment.py
     json_pattern = re.compile(r'```(.*?)```', re.DOTALL)
@@ -54,8 +54,8 @@ def compress_prompt(prompt, rate=0.0):
     return compressed_prompt
 
 def perturb_output(text, p_level):
-    reordered = substitute_words(text=text, p_level=p_level)
-    subbed = substitute_words(text=reordered)
+    reordered = reorder_sentences(text=text)
+    subbed = substitute_words(text=reordered, p_level=p_level)
     return subbed
 
 def get_synonyms(word, postag):

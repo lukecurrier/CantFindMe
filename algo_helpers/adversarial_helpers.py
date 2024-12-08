@@ -74,7 +74,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         if "compression" in config:
             self.compress_prompt = config["compression"][0]
         if "perturbation" in config:
-            self.perturb_defender_output = config["perturbation"]
+            self.perturb_defender_output = config["perturbation"][0]
 
     def generate_adversarial_prompt(self, model_handle: str, past_prompts: List =[], _num_attempts:int = 0, 
                                     word_limit: int = 100, past_outputs=None, past_results = None):
@@ -227,9 +227,9 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                             api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
                             system="",
                             message=p_optim)
-                        logger.info("Original response: {response}")
+                        logger.info(f"Original response: {response}")
                         response = perturb_output(response, self.perturb_defender_output)
-                        logger.info("Perturbed response: {response}")
+                        logger.info(f"Perturbed response: {response}")
                     else:
                         response = TogetherClient(
                             api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
