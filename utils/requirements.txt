@@ -19,3 +19,4 @@ nltk
 torch
 llmlingua
 spacy
+llm

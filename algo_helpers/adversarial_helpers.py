@@ -21,10 +21,8 @@ import argparse
 from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
 from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
-from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, extract_json, ResponseEvaluationTensor, parse_args, compress_prompt
+from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, extract_json, ResponseEvaluationTensor, parse_args, compress_prompt, perturb_output
 logger = setup_logger(__name__)
-
-
 
 prompt_formula = """Formula:
 
@@ -223,6 +221,15 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                             api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
                             system="",
                             message=compressed["compressed_prompt"])
+                    elif self.perturb_defender_output > 0.0 and col_idx==0:
+                        print("Perturbing output")
+                        response = TogetherClient(
+                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            system="",
+                            message=p_optim)
+                        logger.info("Original response: {response}")
+                        response = perturb_output(response, self.perturb_defender_output)
+                        logger.info("Perturbed response: {response}")
                     else:
                         response = TogetherClient(
                             api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(

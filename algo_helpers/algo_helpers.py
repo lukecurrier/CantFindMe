@@ -16,14 +16,20 @@ from scipy.stats import ttest_ind, ttest_ind, mannwhitneyu, t, sem
 from dotenv import load_dotenv
 import argparse
 
-from llm.llm_client import TogetherClient
-from utils.logger_config import setup_logger
-from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
+#from llm.llm_client import TogetherClient
+#from utils.logger_config import setup_logger
+#from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
 
 from llmlingua import PromptCompressor
 
-logger = setup_logger(__name__)
+import spacy
+import nltk
+from nltk.corpus import wordnet
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nlp = spacy.load("en_core_web_sm")
 
+#logger = setup_logger(__name__)
 
 def extract_json(text):  # FIXME, duplicate from llm/llm_provider_ranking_experiment.py
     json_pattern = re.compile(r'```(.*?)```', re.DOTALL)
@@ -42,13 +48,55 @@ def extract_json(text):  # FIXME, duplicate from llm/llm_provider_ranking_experi
             return None
     return None
 
-def compress_prompt(prompt, rate=0.5):
+def compress_prompt(prompt, rate=0.0):
     llm_lingua = PromptCompressor("microsoft/phi-2", device_map="mps")
     compressed_prompt = llm_lingua.compress_prompt(prompt, rate=rate)
     return compressed_prompt
 
-def perturb_output(): 
-    return None
+def perturb_output(text, p_level):
+    reordered = substitute_words(text=text, p_level=p_level)
+    subbed = substitute_words(text=reordered)
+    return subbed
+
+def get_synonyms(word, postag):
+    synsets = wordnet.synsets(word, pos=postag)
+    synonyms = {lemma.name().replace('_', ' ') for syn in synsets for lemma in syn.lemmas()}
+    return list(synonyms)
+
+def substitute_words(text, p_level):
+    """Perform static substitution on eligible words."""
+    doc = nlp(text)
+    perturbed_text = []
+    
+    for token in doc:
+        if token.pos_ in {"ADJ", "VERB", "ADV"} and random.random() < p_level: 
+            pos_map = {"ADJ": wordnet.ADJ, "VERB": wordnet.VERB, "ADV": wordnet.ADV}
+            synonyms = get_synonyms(token.text, pos_map[token.pos_])
+            if synonyms:
+                # Choose a random synonym and preserve the token's original spacing
+                perturbed_text.append(synonyms[random.randint(0, len(synonyms) - 1)] + token.whitespace_)
+            else:
+                perturbed_text.append(token.text + token.whitespace_)
+        else:
+            perturbed_text.append(token.text + token.whitespace_)
+    
+    return "".join(perturbed_text)
+
+def reorder_sentences(text):
+    doc = nlp(text)
+    
+    independent = []
+    dependent = []
+    for sent in doc.sents:
+        if any(tok.dep_ in {"mark", "prep", "cc"} for tok in sent): 
+            dependent.append(sent.text)
+        else:
+            independent.append(sent.text)
+    
+    random.shuffle(independent)
+    
+    reordered = independent + dependent
+    return " ".join(reordered)
 
 class LLMModel:
     def __init__(self, model_handle, MMLU_score=None, name=None):
