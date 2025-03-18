@@ -2,7 +2,7 @@ import os
 
 from mistralai import Mistral, UserMessage, SystemMessage
 
-# from openai import OpenAI
+from openai import OpenAI
 import anthropic
 from together import Together
 
@@ -44,26 +44,26 @@ class MistralClient(Client):
         return chat_response.choices[0].message.content
 
 
-# class OpenAIClient(Client):
-#     def __init__(self, api_key, model=None, url=None):
-#         super().__init__()
-#         api_key = api_key or os.environ["OPENAI_API_KEY"]
-#         self.client = OpenAI(api_key=api_key, base_url=url)
-#         self.model = model or "gpt-4"
-#
-#     @retry(wait=wait_random_exponential(min=6, max=100), stop=stop_after_attempt(5))
-#     def get_completion(self, system: str, message: str, **generate_args):
-#         messages = []
-#         if system:
-#             messages.append({"role": "system", "content": system})
-#         messages.append({"role": "user", "content":  message})
-#         if "model" not in generate_args:
-#             generate_args["model"] = self.model
-#         chat_response = self.client.chat.completions.create(
-#             messages=messages,
-#             **generate_args
-#         )
-#         return chat_response.choices[0].message.content
+class OpenAIClient(Client):
+    def __init__(self, api_key, model=None, url=None):
+        super().__init__()
+        api_key = api_key or os.environ["OPENAI_API_KEY"]
+        self.client = OpenAI(api_key=api_key, base_url=url)
+        self.model = model or "gpt-4"
+
+    @retry(wait=wait_random_exponential(min=6, max=100), stop=stop_after_attempt(5))
+    def get_completion(self, system: str, message: str, **generate_args):
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content":  message})
+        if "model" not in generate_args:
+            generate_args["model"] = self.model
+        chat_response = self.client.chat.completions.create(
+            messages=messages,
+            **generate_args
+        )
+        return chat_response.choices[0].message.content
 
 
 class AnthropicClient(Client):
@@ -131,8 +131,8 @@ def client_from_args(client_str: str, **client_args):
     if client_str == "mistral":
         return MistralClient(api_key=api_key, model=model)
 
-    # elif client_str == "openai":
-    #     return OpenAIClient(api_key=api_key, model=model)
+    elif client_str == "openai":
+        return OpenAIClient(api_key=api_key, model=model)
 
     elif client_str == "anthropic":
         return AnthropicClient(api_key=api_key, model=model)
@@ -141,5 +141,4 @@ def client_from_args(client_str: str, **client_args):
         return TogetherClient(api_key=api_key, model=model)
 
     else:
-        raise ValueError(f"supported choices are ['mistral', 'openai', 'anthropic', 'together']. Got {client_str}")
-
+        raise ValueError(f"{client_str} is not a supported client - try one of ['mistral', 'openai', 'anthropic', 'together']")

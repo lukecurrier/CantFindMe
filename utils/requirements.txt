@@ -18,5 +18,7 @@ mauve-text
 nltk
 torch
 llmlingua
-spacy
 llm
+nltk
+spacy
+pandas
