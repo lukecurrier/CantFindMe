@@ -9,8 +9,6 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 
-from together import Together
-
 import pandas as pd
 from scipy.stats import ttest_ind, ttest_ind, mannwhitneyu, t, sem
 from dotenv import load_dotenv
@@ -28,6 +26,8 @@ from nltk.corpus import wordnet
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 nlp = spacy.load("en_core_web_sm")
+
+load_dotenv()
 
 logger = setup_logger(__name__)
 
@@ -179,7 +179,7 @@ class ResponseEvaluationTensor:
 
         choice_seed = random.choice(seed_prompts)
 
-        response = TogetherClient(model=model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+        response = TogetherClient(model=model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
             system=f"""{choice_seed}. Place the prompt in JSON format
             ```json{{"prompt": "_____"}}```
             """,
@@ -199,7 +199,7 @@ class ResponseEvaluationTensor:
             print("Opt prompt out of attempts")
             return ""
 
-        response = TogetherClient(model=model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+        response = TogetherClient(model=model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
             system='Given a prompt, optimize it so that you, when asked, would produce the best possible answer:',
             message='BEGINNING OF PROMPT\n'
                     f'{unoptimized_prompt}\n'
@@ -250,7 +250,7 @@ class ResponseEvaluationTensor:
             user_message += (f"given the following user query:\n{model_prompt}. "
                             f"provide a rating for this Context:\n{model_output}")
 
-            response = TogetherClient(model=model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+            response = TogetherClient(model=model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
                 system=user_message, message="")
 
             print(f"Response - {response}")
@@ -314,7 +314,7 @@ class ResponseEvaluationTensor:
 
                     # DUT
                     response = TogetherClient(
-                        api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                        api_key=os.getenv("TOGETHER_API_KEY"), model=model_under_test.model_handle).get_completion(
                         system="",
                         message=p_optim)
 

@@ -5,6 +5,7 @@ from mistralai import Mistral, UserMessage, SystemMessage
 from openai import OpenAI
 import anthropic
 from together import Together
+from dotenv import load_dotenv
 
 from tenacity import (
     retry,
@@ -12,6 +13,7 @@ from tenacity import (
     wait_random_exponential,
 )
 
+load_dotenv()
 
 class Client:
     def __init__(self):
@@ -100,7 +102,7 @@ class AnthropicClient(Client):
 class TogetherClient(Client):
     def __init__(self, api_key, model=None):
         super().__init__()
-        api_key = api_key or os.environ["TOGETHER_API_KEY"]
+        api_key = api_key or os.getenv("TOGETHER_API_KEY")
         self.client = Together(api_key=api_key)
         self.model = model or "meta-llama/Llama-3-8b-chat-hf"
 

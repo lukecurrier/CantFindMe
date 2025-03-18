@@ -1,27 +1,20 @@
 from collections import defaultdict
 import os
-import random
-import re
-from typing import List, Tuple, Dict
+from typing import List, Dict
 import json
 import yaml
 
-import networkx as nx
 import numpy as np
-import matplotlib.pyplot as plt
 
-from together import Together
-
-import pandas as pd
-from scipy.stats import ttest_ind, ttest_ind, mannwhitneyu, t, sem
 from dotenv import load_dotenv
 import argparse
 
-
 from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
-from algo_helpers.language_metric_helper import evaluate_similarity, convert_to_json_format
-from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, extract_json, ResponseEvaluationTensor, parse_args, compress_prompt, perturb_output
+from algo_helpers.algo_helpers import LLMModel, EvaluationConfig, ResponseEvaluationTensor, parse_args, compress_prompt, perturb_output
+
+load_dotenv()
+
 logger = setup_logger(__name__)
 
 prompt_formula = """Formula:
@@ -60,7 +53,7 @@ F = randomly select one of the following:
 def load_config(file_path='config.yaml'):
     with open(file_path, 'r') as file:
         return yaml.safe_load(file)   
-
+        
 
 class AdversarialEvaluation (ResponseEvaluationTensor):
 
@@ -115,7 +108,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         ```
         """
 
-        response = TogetherClient(model=model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+        response = TogetherClient(model=model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
             system=system_prompt,
             message=message_str
         )
@@ -152,7 +145,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
             """
             user_message = f"given the following model outputs:\n{json.dumps(model_outputs)}"
             evaluator_model_handle = self.auditor_model.model_handle
-            response = TogetherClient(model=evaluator_model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+            response = TogetherClient(model=evaluator_model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
                 system=system_prompt, message=user_message)
             
             try:
@@ -218,13 +211,13 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                         compressed = compress_prompt(prompt=p_optim, rate=self.compress_prompt)
                         print(compressed)
                         response = TogetherClient(
-                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            api_key=os.getenv("TOGETHER_API_KEY"), model=model_under_test.model_handle).get_completion(
                             system="",
                             message=compressed["compressed_prompt"])
                     elif self.perturb_defender_output > 0.0 and col_idx==0:
                         print("Perturbing output")
                         response = TogetherClient(
-                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            api_key=os.getenv("TOGETHER_API_KEY"), model=model_under_test.model_handle).get_completion(
                             system="",
                             message=p_optim)
                         logger.info(f"Original response: {response}")
@@ -232,7 +225,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                         logger.info(f"Perturbed response: {response}")
                     else:
                         response = TogetherClient(
-                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(
+                            api_key=os.getenv("TOGETHER_API_KEY"), model=model_under_test.model_handle).get_completion(
                             system="",
                             message=p_optim)
                     model_outputs.append(response)

@@ -17,6 +17,7 @@ from scipy.stats import ttest_ind, ttest_ind, mannwhitneyu, t, sem
 from dotenv import load_dotenv
 import argparse
 
+load_dotenv()
 
 from llm.llm_client import TogetherClient
 from utils.logger_config import setup_logger
@@ -118,7 +119,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
         ```
         """
 
-        response = TogetherClient(model=model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+        response = TogetherClient(model=model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
             system=system_prompt,
             message=message_str
         )
@@ -155,7 +156,7 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
             """
             user_message = f"given the following model outputs:\n{json.dumps(model_outputs)}"
             evaluator_model_handle = self.auditor_model.model_handle
-            response = TogetherClient(model=evaluator_model_handle, api_key=os.environ["TOGETHER_API_KEY"]).get_completion(
+            response = TogetherClient(model=evaluator_model_handle, api_key=os.getenv("TOGETHER_API_KEY")).get_completion(
                 system=system_prompt, message=user_message)
             
             try:
@@ -220,12 +221,12 @@ class AdversarialEvaluation (ResponseEvaluationTensor):
                         self.most_recent_ensemble = model_under_test.return_random_handle()
 
                         response = TogetherClient(
-                            api_key=os.environ["TOGETHER_API_KEY"], model=self.most_recent_ensemble).get_completion(system="", message=p_optim)
+                            api_key=os.getenv("TOGETHER_API_KEY"), model=self.most_recent_ensemble).get_completion(system="", message=p_optim)
 
                         logger.info(f"Ensembled model: {self.most_recent_ensemble}")
                     elif hasattr(model_under_test, "model_handle"):
                         response = TogetherClient(
-                            api_key=os.environ["TOGETHER_API_KEY"], model=model_under_test.model_handle).get_completion(system="", message=p_optim)
+                            api_key=os.getenv("TOGETHER_API_KEY"), model=model_under_test.model_handle).get_completion(system="", message=p_optim)
                     else:
                         raise TypeError(
                             "model_under_test must be an EnsembleModel or have a model_handle attribute."
